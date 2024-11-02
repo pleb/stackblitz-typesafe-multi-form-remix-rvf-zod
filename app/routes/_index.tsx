@@ -24,6 +24,7 @@ import Delete from '~/icons/Delete'
 import Edit from '~/icons/Edit'
 import Loading from '~/icons/LoadingIndicator'
 import { useFocus } from '~/hooks/useFocus'
+import { useFormReset } from '~/hooks/useFormReset'
 
 export const meta: MetaFunction = () => {
   return [
@@ -103,13 +104,19 @@ type Todo = Awaited<ReturnType<typeof loader>>[number]
 export default function Index() {
   const todos = useLoaderData<typeof loader>()
   const actionResult = useActionData<typeof action>()
+
   const [editTodo, setEditTodo] = useState<Todo>()
-  const clearEdit = useCallback(() => setEditTodo(undefined), [setEditTodo])
+  const [formRef, resetForm] = useFormReset()
   const [inputRef, setInputFocus] = useFocus<HTMLInputElement>()
 
   useEffect(() => {
     setInputFocus()
   }, [editTodo, setInputFocus])
+
+  const clearEdit = useCallback(() => {
+    setEditTodo(undefined)
+    resetForm()
+  }, [setEditTodo, resetForm])
 
   const loadingContext = useLoadingContext()
 
@@ -197,6 +204,7 @@ export default function Index() {
         </Panel>
 
         <ValidatedForm
+          formRef={formRef}
           validator={validator}
           onSubmit={() => {
             setTimeout(clearEdit)
